@@ -60,6 +60,9 @@ def batch_extract_audio(input_folder, output_folder):
 
 # --- 使用示例 ---
 if __name__ == "__main__":
+    """
+    别忘了在下面改路径前加r，例如r'C:\Users\YourName\Desktop\1'
+    """
     # 指定输入文件夹，存放你的视频文件
     input_directory = "input_videos" # <-- 修改这里
 
