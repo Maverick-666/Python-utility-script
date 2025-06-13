@@ -1,7 +1,7 @@
 # 需要安装moviepy库
 import os
 import glob
-from moviepy.editor import VideoFileClip
+from moviepy import VideoFileClip
 
 
 def batch_extract_audio(input_folder, output_folder):
@@ -21,7 +21,7 @@ def batch_extract_audio(input_folder, output_folder):
     video_files = []
     for fmt in supported_formats:
         # 使用glob查找匹配格式的视频文件并添加到列表
-        video_files.extend(glob.glob(os.path.join(input_folder, fmt)))[3]
+        video_files.extend(glob.glob(os.path.join(input_folder, fmt)))
 
     if not video_files:
         print(f"在文件夹 '{input_folder}' 中未找到支持的视频文件。")
@@ -49,7 +49,7 @@ def batch_extract_audio(input_folder, output_folder):
                     continue
 
                 # 提取音频并写入文件
-                video.audio.write_audiofile(output_audio_path, logger=None)[1]
+                video.audio.write_audiofile(output_audio_path, logger=None)
                 print(f"成功提取音频 -> {output_audio_path}")
 
         except Exception as e:
@@ -60,9 +60,7 @@ def batch_extract_audio(input_folder, output_folder):
 
 # --- 使用示例 ---
 if __name__ == "__main__":
-    """
-    别忘了在下面改路径前加r，例如r'C:\Users\YourName\Desktop\1'
-    """
+
     # 指定输入文件夹，存放你的视频文件
     input_directory = "input_videos" # <-- 修改这里
 

@@ -64,9 +64,7 @@ def batch_resize_images(input_folder, output_folder, width, height, output_forma
 
 # --- 使用示例 ---
 if __name__ == "__main__":
-    """
-    别忘了在下面改路径前加r，例如r'C:\Users\YourName\Desktop\1'
-    """
+
     # 1. 设置输入文件夹
     input_directory = 'input_images' # <-- 修改这里
 

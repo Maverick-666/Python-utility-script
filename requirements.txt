@@ -1,0 +1,10 @@
+# Python Utility Scripts Dependencies
+
+# 用于图片处理
+Pillow
+
+# 用于视频下载（B站等）
+yt-dlp
+
+# 用于视频处理，如音频提取
+moviepy
