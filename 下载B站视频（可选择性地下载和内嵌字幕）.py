@@ -47,12 +47,13 @@ def download_bilibili_video(video_url, output_path='./', download_subtitle=False
     print(f"保存至: {output_path}")
 
     try:
-        # 使用with语句确保资源被正确管理
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([video_url])
         print("\n下载完成!")
     except Exception as e:
         print(f"\n下载出错: {e}")
+        # 在调试时，可以取消下面这行注释来查看完整的错误信息
+        # traceback.print_exc()
 
 
 def progress_hook(d):
@@ -94,14 +95,9 @@ if __name__ == "__main__":
     # 指定保存视频的文件夹，'.' 表示当前文件夹
     save_path = './'
 
-    # --- 控制是否下载字幕 ---
-    # 场景1：下载视频，不带字幕
-    print("--- 任务1：开始下载视频（无字幕） ---")
+   # 确保视频本身有提供字幕，否则此功能无效
+    print("\n" + "="*50)
+    print("--- 开始下载任务（尝试内嵌字幕）---")
+    # 你可以修改这里的 download_subtitle=False 来关闭字幕下载
     download_bilibili_video(target_video_url, save_path, download_subtitle=True)
-
-    print("\n" + "=" * 50 + "\n")
-
-    # 场景2：下载同一个视频，这次带字幕
-    # 确保视频本身有提供字幕，否则此功能无效
-    print("--- 任务2：开始下载视频（带字幕） ---")
-    download_bilibili_video(target_video_url, save_path, download_subtitle=True)
+    print("="*50)

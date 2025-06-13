@@ -1,21 +1,20 @@
 # 需要安装pillow库
-
 from PIL import Image
 import os
 import glob
 
 
-def batch_resize_images(input_folder, output_folder, width, height, output_format='jpg'):
+def batch_resize_images(input_folder, output_folder, max_width, max_height, output_format='jpg'):
     """
-    批量调整文件夹中所有图片的尺寸，并可以指定输出格式。
+    批量调整文件夹中所有图片的尺寸，保持原始宽高比，并可指定输出格式。
+    图片会被等比缩放，以适应 (max_width, max_height) 的边界框。
 
     :param input_folder: 包含原始图片的文件夹路径。
     :param output_folder: 保存调整后图片的文件夹路径。
-    :param width: 目标宽度 (a)。
-    :param height: 目标高度 (b)。
+    :param max_width: 目标宽度的最大值。
+    :param max_height: 目标高度的最大值。
     :param output_format: 目标输出格式的后缀名 (例如 'png', 'jpeg')。
     """
-    # 1. 检查并创建输出文件夹
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
         print(f"已创建输出文件夹: {output_folder}")
@@ -31,52 +30,52 @@ def batch_resize_images(input_folder, output_folder, width, height, output_forma
 
     print(f"找到 {len(image_files)} 张图片，开始处理...")
 
-    # 2. 遍历所有找到的图片文件
     for index, file_path in enumerate(image_files):
         file_name = os.path.basename(file_path)
         try:
             with Image.open(file_path) as img:
-                # 调整图片尺寸
-                img_resized = img.resize((width, height))
+                # --- 核心改进：保持宽高比进行缩放 ---
+                img.thumbnail((max_width, max_height))
+                img_resized = img
 
-                # --- 主要改动点 ---
-                # 获取不带后缀的文件名
+                # --- 文件名和路径处理 ---
                 file_name_without_ext = os.path.splitext(file_name)[0]
-                # 构建新的、带指定后缀的文件名
-                new_file_name = f"{file_name_without_ext}.{output_format}"
+                new_file_name = f"{file_name_without_ext}.{output_format.lower()}"
                 output_path = os.path.join(output_folder, new_file_name)
 
-                # 特殊处理：如果输出格式为jpg/jpeg，且原图有透明通道(RGBA)，则转换为RGB
+                # --- 透明通道处理，现在更加健壮 ---
+                # 如果原图有透明度('P'模式的透明或'RGBA')且要保存为JPG，则转换为RGB
                 if output_format.lower() in ['jpg', 'jpeg']:
-                    if img_resized.mode == 'RGBA':
+                    if img.mode in ('RGBA', 'LA') or (img.mode == 'P' and 'transparency' in img.info):
                         print(f"  (提示: {file_name} 包含透明通道, 已转换为RGB格式进行保存)")
-                        img_resized = img_resized.convert('RGB')
+                        # 使用一个白色背景进行填充
+                        img_resized = Image.new("RGB", img.size, (255, 255, 255))
+                        img_resized.paste(img, (0, 0), img.getchannel('A') if img.mode == 'RGBA' else None)
 
                 # 保存为指定格式
                 img_resized.save(output_path)
-                print(f"({index + 1}/{len(image_files)}) 已处理: {file_name} -> {new_file_name}")
+                print(
+                    f"({index + 1}/{len(image_files)}) 已处理: {file_name} -> {new_file_name} (尺寸: {img_resized.size})")
 
         except Exception as e:
             print(f"处理文件 {file_name} 时出错: {e}")
 
-    print("所有图片处理完成！")
+    print("\n所有图片处理完成！")
 
 
 # --- 使用示例 ---
 if __name__ == "__main__":
+    """
+    提示：脚本会将图片等比例缩放，确保其宽度不超过 target_max_width，高度不超过 target_max_height。
+    """
+    input_directory = 'input_images'
+    output_directory = 'output_images_resized'
 
-    # 1. 设置输入文件夹
-    input_directory = 'input_images' # <-- 修改这里
+    # 设置目标尺寸的最大边界
+    target_max_width = 800
+    target_max_height = 600
 
-    # 2. 指定你的输出文件夹路径
-    output_directory = 'output_images_converted' # <-- 修改这里
+    # 定义你想要的输出格式
+    target_format = 'png'
 
-    # 3. 设置目标尺寸
-    target_width = 800 # <-- 修改这里
-    target_height = 600 # <-- 修改这里
-
-    # 4. 新增：在这里定义你想要的输出格式 (例如 'png', 'jpeg', 'bmp', 'gif')
-    target_format = 'png'  # <--- 修改这里来改变输出格式
-
-    # 调用批量处理函数，并传入新的格式参数
-    batch_resize_images(input_directory, output_directory, target_width, target_height, target_format)
+    batch_resize_images(input_directory, output_directory, target_max_width, target_max_height, target_format)
