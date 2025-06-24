@@ -104,6 +104,12 @@ def get_links(filename: str):
     if not os.path.isfile(filename):
         return []
     
+    # 新增文件类型过滤逻辑
+    allowed_extensions = ['.md', '.txt']  # 允许处理的文件类型
+    file_ext = os.path.splitext(filename)[1].lower()
+    if file_ext not in allowed_extensions:
+        return []  # 直接跳过非文本文件
+    
     try:
         with open(filename, 'r', encoding='utf-8') as f:
             note = f.read()
